@@ -148,4 +148,80 @@ ${inventoryTable}
   }
 }
 
+const crypto = require('crypto');
+const { eq } = require('drizzle-orm');
+
+app.get('/api/config', async (req, res) => {
+  try {
+    let config = await db.select().from(businessConfig).limit(1);
+    if (config.length === 0) {
+      const id = crypto.randomUUID();
+      const defaultConf = {
+        id,
+        storeName: 'My Store',
+        aiEnabled: true,
+        systemPersona: 'আপনি একজন সাহায্যকারী কাস্টমার সাপোর্ট এজেন্ট।',
+        deliveryPolicy: 'ডেলিভারি ৩-৫ দিনের মধ্যে সম্পন্ন হয়।',
+        paymentPolicy: 'আমরা ক্যাশ অন ডেলিভারি (COD) গ্রহণ করি।'
+      };
+      await db.insert(businessConfig).values(defaultConf);
+      config = [defaultConf];
+    }
+    res.json(config[0]);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.post('/api/config', async (req, res) => {
+  try {
+    const { storeName, aiEnabled, systemPersona, deliveryPolicy, paymentPolicy } = req.body;
+    let config = await db.select().from(businessConfig).limit(1);
+    if (config.length > 0) {
+      await db.update(businessConfig)
+        .set({ storeName, aiEnabled, systemPersona, deliveryPolicy, paymentPolicy })
+        .where(eq(businessConfig.id, config[0].id));
+    }
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.get('/api/products', async (req, res) => {
+  try {
+    const allProducts = await db.select().from(products);
+    res.json(allProducts);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.post('/api/products', async (req, res) => {
+  try {
+    const { name, price, sizes, features } = req.body;
+    const newProduct = {
+      id: crypto.randomUUID(),
+      name,
+      price,
+      sizes,
+      features,
+      isActive: true
+    };
+    await db.insert(products).values(newProduct);
+    res.json(newProduct);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.delete('/api/products/:id', async (req, res) => {
+  try {
+    await db.delete(products).where(eq(products.id, req.params.id));
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 app.listen(port, () => console.log(`Server on ${port}`));
