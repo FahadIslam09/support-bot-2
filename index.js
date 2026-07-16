@@ -8,6 +8,7 @@ const { ChatService } = require('./src/services/chatService');
 
 const app = express();
 app.use(express.json());
+app.use(express.static('public'));
 const port = process.env.PORT || 3000;
 
 const openai = new OpenAI({
@@ -151,7 +152,8 @@ ${storeConfig?.paymentPolicy || ''}
     const apiMessages = [{ role: 'system', content: systemPrompt }];
     
     for (let i = 0; i < history.length - 1; i++) {
-      apiMessages.push({ role: history[i].role, content: history[i].content });
+      const r = history[i].role === 'model' ? 'assistant' : history[i].role;
+      apiMessages.push({ role: r, content: history[i].content });
     }
     apiMessages.push({ role: 'user', content: userContents });
 
@@ -161,7 +163,7 @@ ${storeConfig?.paymentPolicy || ''}
     });
 
     const aiText = completion.choices[0].message.content;
-    await ChatService.logMessage(conversation.id, 'model', aiText);
+    await ChatService.logMessage(conversation.id, 'assistant', aiText);
     await sendFacebookMessage(psid, pageId, aiText);
 
   } catch (err) {

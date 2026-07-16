@@ -49,7 +49,7 @@ export class ChatService {
     return newConv;
   }
 
-  static async logMessage(conversationId: string, role: 'user' | 'model', content: string) {
+  static async logMessage(conversationId: string, role: 'user' | 'assistant' | 'model', content: string) {
     const [newMessage] = await db
       .insert(messages)
       .values({ conversationId, role, content })

@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Support Admin</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:wght@400;500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="orb orb-mint"></div>
+    <div class="orb orb-peach"></div>
+    
+    <nav class="top-nav">
+        <div class="brand">Admin Dashboard</div>
+    </nav>
+
+    <main class="container">
+        <div class="hero-band">
+            <h1 class="display-lg">Manage your bot.</h1>
+            <p class="body-md muted">Configure your AI persona, store policies, and inventory.</p>
+        </div>
+
+        <section class="config-section">
+            <div class="feature-card">
+                <h2 class="title-md">Business Settings</h2>
+                <form id="configForm">
+                    <div class="form-group">
+                        <label class="body-sm">Store Name</label>
+                        <input type="text" id="storeName" class="text-input" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="body-sm">AI Enabled</label>
+                        <div class="toggle-container">
+                            <input type="checkbox" id="aiEnabled" class="toggle-checkbox">
+                            <label for="aiEnabled" class="toggle-label"></label>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="body-sm">System Persona</label>
+                        <textarea id="systemPersona" class="text-input textarea"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label class="body-sm">Delivery Policy</label>
+                        <textarea id="deliveryPolicy" class="text-input textarea"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label class="body-sm">Payment Policy</label>
+                        <textarea id="paymentPolicy" class="text-input textarea"></textarea>
+                    </div>
+                    <button type="submit" class="button-primary">Save Settings</button>
+                </form>
+            </div>
+        </section>
+
+        <section class="inventory-section">
+            <div class="feature-card">
+                <h2 class="title-md">Inventory</h2>
+                <form id="productForm" class="inline-form">
+                    <input type="text" id="pName" class="text-input" placeholder="Product Name" required>
+                    <input type="text" id="pPrice" class="text-input" placeholder="Price">
+                    <input type="text" id="pSizes" class="text-input" placeholder="Sizes">
+                    <input type="text" id="pFeatures" class="text-input" placeholder="Features">
+                    <button type="submit" class="button-primary">Add Product</button>
+                </form>
+                
+                <div class="product-list" id="productList">
+                    <!-- Dynamic -->
+                </div>
+            </div>
+        </section>
+    </main>
+    <script src="app.js"></script>
+</body>
+</html>
