@@ -23,7 +23,6 @@ body {
   line-height: 1.5;
   letter-spacing: 0.16px;
   overflow-x: hidden;
-  position: relative;
 }
 
 .display-lg {
@@ -39,29 +38,77 @@ body {
 .muted { color: var(--muted); }
 
 .orb {
-  position: absolute;
+  position: fixed;
   width: 600px; height: 600px;
   border-radius: 50%;
   filter: blur(120px);
   opacity: 0.5;
   z-index: -1;
+  pointer-events: none;
 }
-.orb-mint { background: var(--gradient-mint); top: -100px; left: -100px; }
+.orb-mint { background: var(--gradient-mint); top: -100px; left: 100px; }
 .orb-peach { background: var(--gradient-peach); top: 20%; right: -200px; }
 
-.top-nav {
-  height: 64px;
-  display: flex; align-items: center; justify-content: space-between;
-  padding: 0 48px;
+.app-layout {
+  display: flex;
+  min-height: 100vh;
 }
-.brand { font-weight: 600; font-size: 18px; }
 
-.container { max-width: 1000px; margin: 0 auto; padding: 0 24px 96px; }
+/* Sidebar */
+.sidebar {
+  width: 250px;
+  background-color: var(--surface-card);
+  border-right: 1px solid var(--hairline);
+  padding: 32px 0;
+  position: fixed;
+  top: 0; bottom: 0; left: 0;
+  z-index: 10;
+}
+.brand {
+  font-weight: 600; font-size: 18px;
+  padding: 0 24px;
+  margin-bottom: 32px;
+}
+.side-nav {
+  display: flex;
+  flex-direction: column;
+}
+.nav-link {
+  text-decoration: none;
+  color: var(--muted);
+  font-size: 15px;
+  font-weight: 500;
+  padding: 12px 24px;
+  transition: 0.2s;
+  border-right: 2px solid transparent;
+}
+.nav-link:hover {
+  background-color: var(--surface-strong);
+  color: var(--ink);
+}
+.nav-link.active {
+  color: var(--ink);
+  background-color: var(--surface-strong);
+  border-right-color: var(--primary);
+}
 
-.hero-band { padding: 96px 0 64px; text-align: center; }
-.hero-band p { margin-top: 12px; }
+/* Main Content */
+.main-content {
+  flex: 1;
+  margin-left: 250px;
+  padding: 48px;
+  max-width: 1200px;
+}
 
-section { margin-bottom: 32px; }
+.view-section { display: none; }
+.view-section.active { display: block; animation: fadeIn 0.3s ease; }
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.hero-band, .header-band { margin-bottom: 48px; }
+.header-band p { margin-top: 8px; }
 
 .feature-card {
   background-color: var(--surface-card);
@@ -71,6 +118,7 @@ section { margin-bottom: 32px; }
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.02);
 }
 
+/* Forms */
 .form-group { margin-bottom: 20px; }
 .form-group label { display: block; margin-bottom: 8px; font-weight: 500; }
 
@@ -85,9 +133,9 @@ section { margin-bottom: 32px; }
 .text-input:focus { outline: none; border-color: var(--ink); }
 .textarea { resize: vertical; min-height: 80px; }
 
+/* Buttons */
 .button-primary {
-  background-color: var(--primary);
-  color: var(--on-primary);
+  background-color: var(--primary); color: var(--on-primary);
   border: none; border-radius: 9999px;
   padding: 10px 20px; font-size: 15px; font-weight: 500;
   cursor: pointer; transition: 0.2s;
@@ -97,10 +145,11 @@ section { margin-bottom: 32px; }
 .button-outline {
   background-color: transparent; color: var(--ink);
   border: 1px solid var(--hairline-strong); border-radius: 9999px;
-  padding: 6px 16px; font-size: 14px; font-weight: 500; cursor: pointer;
+  padding: 8px 16px; font-size: 14px; font-weight: 500; cursor: pointer;
 }
 .button-outline:hover { background-color: var(--surface-strong); }
 
+/* Toggle */
 .toggle-container { position: relative; width: 48px; height: 24px; }
 .toggle-checkbox { opacity: 0; width: 0; height: 0; }
 .toggle-label {
@@ -114,7 +163,8 @@ section { margin-bottom: 32px; }
 .toggle-checkbox:checked + .toggle-label { background-color: var(--primary); }
 .toggle-checkbox:checked + .toggle-label:before { transform: translateX(24px); }
 
-.inline-form { display: flex; gap: 12px; margin-bottom: 24px; flex-wrap: wrap; }
+/* Inventory */
+.inline-form { display: flex; gap: 12px; margin-bottom: 24px; flex-wrap: wrap; align-items: flex-start; }
 .inline-form .text-input { flex: 1; min-width: 150px; }
 
 .product-row {
@@ -122,5 +172,40 @@ section { margin-bottom: 32px; }
   padding: 16px 0; border-bottom: 1px solid var(--hairline);
 }
 .product-row:last-child { border-bottom: none; }
+.product-info { flex: 1; }
 .product-name { font-weight: 500; }
 .product-details { font-size: 14px; color: var(--muted); margin-top: 4px; }
+.product-actions { display: flex; gap: 8px; }
+
+/* Chat Viewer */
+.chat-layout { display: flex; gap: 24px; height: 600px; }
+.chat-sidebar { flex: 1; overflow-y: auto; padding: 16px; }
+.chat-main { flex: 2; display: flex; flex-direction: column; padding: 16px; }
+
+.convo-item {
+  padding: 12px; border-radius: 8px; cursor: pointer;
+  border: 1px solid transparent; margin-bottom: 8px;
+}
+.convo-item:hover { background-color: var(--canvas); }
+.convo-item.active { background-color: var(--canvas); border-color: var(--hairline-strong); }
+.convo-name { font-weight: 500; }
+.convo-time { font-size: 12px; color: var(--muted); }
+
+.chat-history { flex: 1; overflow-y: auto; padding-right: 8px; }
+.msg-bubble { max-width: 80%; padding: 12px 16px; border-radius: 16px; margin-bottom: 12px; font-size: 15px; }
+.msg-user { background-color: var(--surface-strong); margin-left: auto; border-bottom-right-radius: 4px; }
+.msg-assistant { background-color: var(--canvas); border: 1px solid var(--hairline); margin-right: auto; border-bottom-left-radius: 4px; }
+.msg-system { background-color: #fff9c4; font-size: 13px; font-family: monospace; }
+
+/* Toasts */
+.toast-container { position: fixed; bottom: 24px; right: 24px; z-index: 100; display: flex; flex-direction: column; gap: 12px; }
+.toast {
+  background-color: var(--ink); color: var(--on-primary);
+  padding: 12px 24px; border-radius: 8px;
+  font-size: 14px; font-weight: 500;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  animation: toastIn 0.3s ease forwards;
+}
+@keyframes toastIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+.toast.hide { animation: toastOut 0.3s ease forwards; }
+@keyframes toastOut { to { transform: translateX(100%); opacity: 0; } }

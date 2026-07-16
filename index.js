@@ -209,7 +209,8 @@ ${storeConfig?.paymentPolicy || ''}
 }
 
 const crypto = require('crypto');
-const { eq } = require('drizzle-orm');
+const { eq, desc } = require('drizzle-orm');
+const { conversations, customers, messages } = require('./src/db/schema');
 
 app.get('/api/config', async (req, res) => {
   try {
@@ -279,6 +280,65 @@ app.delete('/api/products/:id', async (req, res) => {
   try {
     await db.delete(products).where(eq(products.id, req.params.id));
     res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.put('/api/products/:id', async (req, res) => {
+  try {
+    const { name, price, sizes, features } = req.body;
+    await db.update(products)
+      .set({ name, price, sizes, features })
+      .where(eq(products.id, req.params.id));
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.put('/api/products/:id/toggle', async (req, res) => {
+  try {
+    const { isActive } = req.body;
+    await db.update(products)
+      .set({ isActive })
+      .where(eq(products.id, req.params.id));
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.get('/api/conversations', async (req, res) => {
+  try {
+    const list = await db
+      .select({
+        id: conversations.id,
+        status: conversations.status,
+        startedAt: conversations.startedAt,
+        lastMessageAt: conversations.lastMessageAt,
+        firstName: customers.firstName,
+        lastName: customers.lastName,
+        psid: customers.psid,
+      })
+      .from(conversations)
+      .leftJoin(customers, eq(conversations.customerId, customers.id))
+      .orderBy(desc(conversations.lastMessageAt))
+      .limit(50);
+    res.json(list);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.get('/api/conversations/:id', async (req, res) => {
+  try {
+    const msgs = await db
+      .select()
+      .from(messages)
+      .where(eq(messages.conversationId, req.params.id))
+      .orderBy(messages.createdAt);
+    res.json(msgs);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

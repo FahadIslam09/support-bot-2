@@ -12,66 +12,115 @@
 <body>
     <div class="orb orb-mint"></div>
     <div class="orb orb-peach"></div>
-    
-    <nav class="top-nav">
-        <div class="brand">Admin Dashboard</div>
-    </nav>
 
-    <main class="container">
-        <div class="hero-band">
-            <h1 class="display-lg">Manage your bot.</h1>
-            <p class="body-md muted">Configure your AI persona, store policies, and inventory.</p>
-        </div>
+    <div class="app-layout">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="brand">Admin Dashboard</div>
+            <nav class="side-nav">
+                <a href="#overview" class="nav-link active" data-target="overview">Overview</a>
+                <a href="#messages" class="nav-link" data-target="messages">Messages</a>
+                <a href="#products" class="nav-link" data-target="products">Products</a>
+                <a href="#settings" class="nav-link" data-target="settings">Settings</a>
+            </nav>
+        </aside>
 
-        <section class="config-section">
-            <div class="feature-card">
-                <h2 class="title-md">Business Settings</h2>
-                <form id="configForm">
-                    <div class="form-group">
-                        <label class="body-sm">Store Name</label>
-                        <input type="text" id="storeName" class="text-input" required>
+        <!-- Main Content -->
+        <main class="main-content">
+            
+            <!-- Overview Section -->
+            <section id="overview" class="view-section active">
+                <div class="hero-band">
+                    <h1 class="display-lg">Welcome back.</h1>
+                    <p class="body-md muted">Here is the current state of your AI assistant.</p>
+                </div>
+                <div class="feature-card">
+                    <h2 class="title-md">Quick Stats</h2>
+                    <p class="body-md muted">Overview stats will be added here in the future.</p>
+                </div>
+            </section>
+
+            <!-- Messages Section -->
+            <section id="messages" class="view-section">
+                <div class="header-band">
+                    <h1 class="display-lg">Conversations</h1>
+                    <p class="body-md muted">View chat history between the AI and customers.</p>
+                </div>
+                <div class="chat-layout">
+                    <div class="chat-sidebar feature-card" id="conversationList">
+                        <!-- Convos -->
                     </div>
-                    <div class="form-group">
-                        <label class="body-sm">AI Enabled</label>
-                        <div class="toggle-container">
-                            <input type="checkbox" id="aiEnabled" class="toggle-checkbox">
-                            <label for="aiEnabled" class="toggle-label"></label>
+                    <div class="chat-main feature-card">
+                        <div id="chatHistory" class="chat-history">
+                            <p class="muted">Select a conversation to view.</p>
                         </div>
                     </div>
-                    <div class="form-group">
-                        <label class="body-sm">System Persona</label>
-                        <textarea id="systemPersona" class="text-input textarea"></textarea>
-                    </div>
-                    <div class="form-group">
-                        <label class="body-sm">Delivery Policy</label>
-                        <textarea id="deliveryPolicy" class="text-input textarea"></textarea>
-                    </div>
-                    <div class="form-group">
-                        <label class="body-sm">Payment Policy</label>
-                        <textarea id="paymentPolicy" class="text-input textarea"></textarea>
-                    </div>
-                    <button type="submit" class="button-primary">Save Settings</button>
-                </form>
-            </div>
-        </section>
-
-        <section class="inventory-section">
-            <div class="feature-card">
-                <h2 class="title-md">Inventory</h2>
-                <form id="productForm" class="inline-form">
-                    <input type="text" id="pName" class="text-input" placeholder="Product Name" required>
-                    <input type="text" id="pPrice" class="text-input" placeholder="Price">
-                    <input type="text" id="pSizes" class="text-input" placeholder="Sizes">
-                    <input type="text" id="pFeatures" class="text-input" placeholder="Features">
-                    <button type="submit" class="button-primary">Add Product</button>
-                </form>
-                
-                <div class="product-list" id="productList">
-                    <!-- Dynamic -->
                 </div>
-            </div>
-        </section>
-    </main>
+            </section>
+
+            <!-- Products Section -->
+            <section id="products" class="view-section">
+                <div class="header-band">
+                    <h1 class="display-lg">Inventory</h1>
+                    <p class="body-md muted">Manage your store products and availability.</p>
+                </div>
+                <div class="feature-card">
+                    <form id="productForm" class="inline-form">
+                        <input type="hidden" id="pId">
+                        <input type="text" id="pName" class="text-input" placeholder="Product Name" required>
+                        <input type="text" id="pPrice" class="text-input" placeholder="Price">
+                        <input type="text" id="pSizes" class="text-input" placeholder="Sizes">
+                        <input type="text" id="pFeatures" class="text-input" placeholder="Features">
+                        <button type="submit" class="button-primary" id="pSubmitBtn">Add Product</button>
+                        <button type="button" class="button-outline" id="pCancelBtn" style="display:none;">Cancel</button>
+                    </form>
+                    
+                    <div class="product-list" id="productList"></div>
+                </div>
+            </section>
+
+            <!-- Settings Section -->
+            <section id="settings" class="view-section">
+                <div class="header-band">
+                    <h1 class="display-lg">Settings</h1>
+                    <p class="body-md muted">Configure your AI persona and business policies.</p>
+                </div>
+                <div class="feature-card">
+                    <form id="configForm">
+                        <div class="form-group">
+                            <label class="body-sm">Store Name</label>
+                            <input type="text" id="storeName" class="text-input" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="body-sm">AI Enabled</label>
+                            <div class="toggle-container">
+                                <input type="checkbox" id="aiEnabled" class="toggle-checkbox">
+                                <label for="aiEnabled" class="toggle-label"></label>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="body-sm">System Persona</label>
+                            <textarea id="systemPersona" class="text-input textarea"></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label class="body-sm">Delivery Policy</label>
+                            <textarea id="deliveryPolicy" class="text-input textarea"></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label class="body-sm">Payment Policy</label>
+                            <textarea id="paymentPolicy" class="text-input textarea"></textarea>
+                        </div>
+                        <button type="submit" class="button-primary">Save Settings</button>
+                    </form>
+                </div>
+            </section>
+
+        </main>
+    </div>
+
+    <!-- Toast Notifications -->
+    <div id="toastContainer" class="toast-container"></div>
+
     <script src="app.js"></script>
 </body>
 </html>
