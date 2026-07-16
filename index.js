@@ -12,8 +12,8 @@ app.use(express.static('public'));
 const port = process.env.PORT || 3000;
 
 const openai = new OpenAI({
-  baseURL: 'https://openrouter.ai/api/v1',
-  apiKey: process.env.OPENROUTER_API_KEY,
+  baseURL: 'https://generativelanguage.googleapis.com/v1beta/openai/',
+  apiKey: process.env.GEMINI_API_KEY,
 });
 
 async function fetchImageAsBase64(url) {
@@ -213,7 +213,7 @@ ${storeConfig?.paymentPolicy || ''}
     apiMessages.push({ role: 'user', content: userContents });
 
     const completion = await openai.chat.completions.create({
-      model: 'openai/gpt-4o-mini',
+      model: 'gemini-3.5-flash',
       messages: apiMessages,
     });
 
