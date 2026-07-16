@@ -9,6 +9,10 @@ document.addEventListener('DOMContentLoaded', () => {
         e.preventDefault();
         const data = {
             storeName: document.getElementById('storeName').value,
+            botName: document.getElementById('botName').value,
+            baseCity: document.getElementById('baseCity').value,
+            insideCityCharge: document.getElementById('insideCityCharge').value,
+            outsideCityCharge: document.getElementById('outsideCityCharge').value,
             aiEnabled: document.getElementById('aiEnabled').checked,
             systemPersona: document.getElementById('systemPersona').value,
             deliveryPolicy: document.getElementById('deliveryPolicy').value,
@@ -75,6 +79,7 @@ function initNavigation() {
             document.getElementById(target).classList.add('active');
 
             if (target === 'messages') loadConversations();
+            if (target === 'customers') loadCustomers();
         });
     });
 }
@@ -85,6 +90,10 @@ async function loadConfig() {
         const res = await fetch('/api/config');
         const data = await res.json();
         document.getElementById('storeName').value = data.storeName || '';
+        document.getElementById('botName').value = data.botName || 'AI Assistant';
+        document.getElementById('baseCity').value = data.baseCity || 'Rajshahi';
+        document.getElementById('insideCityCharge').value = data.insideCityCharge || '60';
+        document.getElementById('outsideCityCharge').value = data.outsideCityCharge || '120';
         document.getElementById('aiEnabled').checked = data.aiEnabled;
         document.getElementById('systemPersona').value = data.systemPersona || '';
         document.getElementById('deliveryPolicy').value = data.deliveryPolicy || '';
@@ -237,6 +246,30 @@ async function loadMessages(convId, el) {
         }).join('');
         history.scrollTop = history.scrollHeight;
     } catch(err) {
+        console.error(err);
+    }
+}
+
+// Customers
+async function loadCustomers() {
+    try {
+        const res = await fetch('/api/customers');
+        const list = await res.json();
+        const tbody = document.getElementById('customerTableBody');
+
+        if (list.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="3" class="muted">No customers yet.</td></tr>';
+            return;
+        }
+
+        tbody.innerHTML = list.map(c => `
+            <tr>
+                <td>${c.psid}</td>
+                <td>${c.firstName || 'Unknown'} ${c.lastName || ''}</td>
+                <td>${c.lastActiveAt ? new Date(c.lastActiveAt).toLocaleString() : 'N/A'}</td>
+            </tr>
+        `).join('');
+    } catch (err) {
         console.error(err);
     }
 }

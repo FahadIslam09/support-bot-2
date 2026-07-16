@@ -148,12 +148,14 @@ async function processBufferedMessages(psid, pageId) {
 
     const systemPrompt = `
 ## তোমার পরিচয়
+তুমি ${storeConfig?.botName || 'AI Assistant'}, ${storeConfig?.storeName || 'এই স্টোর'}-এর সেলস অ্যাসিস্ট্যান্ট।
 ${storeConfig?.systemPersona || 'তুমি একজন সেলস অ্যাসিস্ট্যান্ট।'}
 
-## টোন ও ব্যক্তিত্ব
-- তুমি বন্ধুসুলভ, আন্তরিক, এবং professional — যেন একজন অভিজ্ঞ দোকানদার কথা বলছে।
+## টোন ও ব্যক্তিত্ব (Bangladesh Market)
+- তুমি বন্ধুসুলভ, আন্তরিক, এবং professional — যেন একজন অভিজ্ঞ বাংলাদেশি বিক্রেতা কথা বলছে।
 - ইমোজি ব্যবহার করো (কিন্তু অতিরিক্ত নয়, প্রতি মেসেজে ১-২টি)।
 - কাস্টমারকে "ভাইয়া" বা "আপু" বলো (casual but respectful)।
+- দামের ক্ষেত্রে সবসময় "টাকা" বা "Tk" বলবে (যেমন: "৳১৯৯" বা "১৯৯ টাকা")।
 - উৎসাহী এবং আত্মবিশ্বাসী থাকো, কিন্তু pushy হয়ো না।
 
 ## রেসপন্স ফরম্যাট
@@ -170,6 +172,11 @@ ${inventoryTable}
 ## স্টোর পলিসি
 ${storeConfig?.deliveryPolicy || ''}
 ${storeConfig?.paymentPolicy || ''}
+
+## ডেলিভারি চার্জ
+- মূল শহর (${storeConfig?.baseCity || 'Rajshahi'})-এর ভেতরে ডেলিভারি চার্জ ${storeConfig?.insideCityCharge || '60'} টাকা।
+- ${storeConfig?.baseCity || 'Rajshahi'}-এর বাইরে যেকোনো জেলায় ডেলিভারি চার্জ ${storeConfig?.outsideCityCharge || '120'} টাকা।
+- কাস্টমার ঠিকানা দিলে এই চার্জগুলোর ওপর ভিত্তি করে মোট দাম (Total Price) জানিয়ে দেবে।
 
 ## কাস্টমার আসলে যা করবে (কনভার্সেশন ফ্লো)
 ১. প্রোডাক্ট কনফার্ম করো → দাম ও বিশেষত্ব বলো
@@ -252,12 +259,26 @@ app.get('/api/config', async (req, res) => {
 
 app.post('/api/config', async (req, res) => {
   try {
-    const { storeName, aiEnabled, systemPersona, deliveryPolicy, paymentPolicy } = req.body;
-    let config = await db.select().from(businessConfig).limit(1);
-    if (config.length > 0) {
+    const { storeName, botName, baseCity, insideCityCharge, outsideCityCharge, aiEnabled, systemPersona, deliveryPolicy, paymentPolicy } = req.body;
+    const existing = await db.select().from(businessConfig).limit(1);
+
+    if (existing.length > 0) {
       await db.update(businessConfig)
-        .set({ storeName, aiEnabled, systemPersona, deliveryPolicy, paymentPolicy })
-        .where(eq(businessConfig.id, config[0].id));
+        .set({ storeName, botName, baseCity, insideCityCharge, outsideCityCharge, aiEnabled, systemPersona, deliveryPolicy, paymentPolicy })
+        .where(eq(businessConfig.id, existing[0].id));
+    } else {
+      await db.insert(businessConfig).values({
+        id: crypto.randomUUID(),
+        storeName,
+        botName,
+        baseCity,
+        insideCityCharge,
+        outsideCityCharge,
+        aiEnabled,
+        systemPersona,
+        deliveryPolicy,
+        paymentPolicy
+      });
     }
     res.json({ success: true });
   } catch (err) {

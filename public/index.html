@@ -21,6 +21,7 @@
                 <a href="#overview" class="nav-link active" data-target="overview">Overview</a>
                 <a href="#messages" class="nav-link" data-target="messages">Messages</a>
                 <a href="#products" class="nav-link" data-target="products">Products</a>
+                <a href="#customers" class="nav-link" data-target="customers">Customers</a>
                 <a href="#settings" class="nav-link" data-target="settings">Settings</a>
             </nav>
         </aside>
@@ -94,6 +95,24 @@
                             <input type="text" id="storeName" class="text-input" required>
                         </div>
                         <div class="form-group">
+                            <label class="body-sm">Bot Name</label>
+                            <input type="text" id="botName" class="text-input" placeholder="e.g. AI Assistant" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="body-sm">Base City (For Delivery)</label>
+                            <input type="text" id="baseCity" class="text-input" placeholder="e.g. Rajshahi">
+                        </div>
+                        <div style="display: flex; gap: 12px; margin-bottom: 20px;">
+                            <div class="form-group" style="flex:1; margin-bottom: 0;">
+                                <label class="body-sm">Inside City Charge (Tk)</label>
+                                <input type="number" id="insideCityCharge" class="text-input" placeholder="60">
+                            </div>
+                            <div class="form-group" style="flex:1; margin-bottom: 0;">
+                                <label class="body-sm">Outside City Charge (Tk)</label>
+                                <input type="number" id="outsideCityCharge" class="text-input" placeholder="120">
+                            </div>
+                        </div>
+                        <div class="form-group">
                             <label class="body-sm">AI Enabled</label>
                             <div class="toggle-container">
                                 <input type="checkbox" id="aiEnabled" class="toggle-checkbox">
@@ -114,6 +133,28 @@
                         </div>
                         <button type="submit" class="button-primary">Save Settings</button>
                     </form>
+                </div>
+            </section>
+
+            <!-- Customers Section -->
+            <section id="customers" class="view-section">
+                <div class="header-band">
+                    <h1 class="display-lg">Customers</h1>
+                    <p class="body-md muted">All customers who have interacted with your AI.</p>
+                </div>
+                <div class="feature-card">
+                    <table class="data-table" id="customerTable">
+                        <thead>
+                            <tr>
+                                <th>PSID</th>
+                                <th>Name</th>
+                                <th>Last Active</th>
+                            </tr>
+                        </thead>
+                        <tbody id="customerTableBody">
+                            <tr><td colspan="3" class="muted">Loading...</td></tr>
+                        </tbody>
+                    </table>
                 </div>
             </section>
 

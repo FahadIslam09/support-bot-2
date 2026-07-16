@@ -4,6 +4,10 @@ import { sql } from 'drizzle-orm';
 export const businessConfig = pgTable('business_config', {
   id: text('id').primaryKey(),
   storeName: varchar('store_name', { length: 255 }),
+  botName: varchar('bot_name', { length: 255 }).default('AI Assistant'),
+  baseCity: varchar('base_city', { length: 255 }).default('Rajshahi'),
+  insideCityCharge: varchar('inside_city_charge', { length: 50 }).default('60'),
+  outsideCityCharge: varchar('outside_city_charge', { length: 50 }).default('120'),
   aiEnabled: boolean('ai_enabled').default(true),
   systemPersona: text('system_persona'),
   deliveryPolicy: text('delivery_policy'),
