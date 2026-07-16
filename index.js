@@ -79,10 +79,26 @@ async function sendTypingIndicator(psid, pageId) {
   await axios.post(url, { recipient: { id: psid }, sender_action: 'typing_on' }).catch(() => {});
 }
 
+const rateLimits = new Map();
+
 async function processBufferedMessages(psid, pageId) {
   const buffer = messageBuffer.get(psid);
   messageBuffer.delete(psid);
   if (!buffer || buffer.events.length === 0) return;
+
+  const now = Date.now();
+  let rateData = rateLimits.get(psid) || { count: 0, firstReq: now };
+  if (now - rateData.firstReq > 60000) {
+    rateData = { count: 1, firstReq: now };
+  } else {
+    rateData.count++;
+  }
+  rateLimits.set(psid, rateData);
+
+  if (rateData.count > 15) {
+    console.warn(`Rate limit exceeded for PSID: ${psid}`);
+    return;
+  }
 
   try {
     const config = await db.select().from(businessConfig).limit(1);
@@ -209,7 +225,7 @@ ${storeConfig?.paymentPolicy || ''}
 }
 
 const crypto = require('crypto');
-const { eq, desc } = require('drizzle-orm');
+const { eq, desc, sql } = require('drizzle-orm');
 const { conversations, customers, messages } = require('./src/db/schema');
 
 app.get('/api/config', async (req, res) => {
@@ -339,6 +355,28 @@ app.get('/api/conversations/:id', async (req, res) => {
       .where(eq(messages.conversationId, req.params.id))
       .orderBy(messages.createdAt);
     res.json(msgs);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.get('/api/stats', async (req, res) => {
+  try {
+    const [{ count: totalConversations }] = await db.select({ count: sql`count(*)` }).from(conversations);
+    const [{ count: totalCustomers }] = await db.select({ count: sql`count(*)` }).from(customers);
+    const [{ count: totalMessages }] = await db.select({ count: sql`count(*)` }).from(messages);
+    const [{ count: activeProducts }] = await db.select({ count: sql`count(*)` }).from(products).where(eq(products.isActive, true));
+
+    res.json({ totalConversations, totalCustomers, totalMessages, activeProducts });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.get('/api/customers', async (req, res) => {
+  try {
+    const list = await db.select().from(customers).orderBy(desc(customers.lastActiveAt)).limit(100);
+    res.json(list);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

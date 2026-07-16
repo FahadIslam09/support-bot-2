@@ -1,5 +1,6 @@
 document.addEventListener('DOMContentLoaded', () => {
     initNavigation();
+    loadStats();
     loadConfig();
     loadProducts();
 
@@ -89,6 +90,35 @@ async function loadConfig() {
         document.getElementById('deliveryPolicy').value = data.deliveryPolicy || '';
         document.getElementById('paymentPolicy').value = data.paymentPolicy || '';
     } catch (err) {
+        console.error(err);
+    }
+}
+
+// Stats
+async function loadStats() {
+    try {
+        const res = await fetch('/api/stats');
+        const stats = await res.json();
+        const html = `
+            <div style="flex:1; min-width:150px; background:var(--canvas); padding:24px; border-radius:12px; border:1px solid var(--hairline);">
+                <div class="muted" style="font-size:14px; margin-bottom:8px;">Conversations</div>
+                <div class="display-lg" style="font-size:36px; margin-top:0;">${stats.totalConversations || 0}</div>
+            </div>
+            <div style="flex:1; min-width:150px; background:var(--canvas); padding:24px; border-radius:12px; border:1px solid var(--hairline);">
+                <div class="muted" style="font-size:14px; margin-bottom:8px;">Customers</div>
+                <div class="display-lg" style="font-size:36px; margin-top:0;">${stats.totalCustomers || 0}</div>
+            </div>
+            <div style="flex:1; min-width:150px; background:var(--canvas); padding:24px; border-radius:12px; border:1px solid var(--hairline);">
+                <div class="muted" style="font-size:14px; margin-bottom:8px;">Messages</div>
+                <div class="display-lg" style="font-size:36px; margin-top:0;">${stats.totalMessages || 0}</div>
+            </div>
+            <div style="flex:1; min-width:150px; background:var(--canvas); padding:24px; border-radius:12px; border:1px solid var(--hairline);">
+                <div class="muted" style="font-size:14px; margin-bottom:8px;">Active Products</div>
+                <div class="display-lg" style="font-size:36px; margin-top:0;">${stats.activeProducts || 0}</div>
+            </div>
+        `;
+        document.getElementById('statsContainer').innerHTML = html;
+    } catch(err) {
         console.error(err);
     }
 }
