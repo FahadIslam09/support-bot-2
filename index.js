@@ -55,6 +55,7 @@ app.post('/webhook', async (req, res) => {
     const pageId = entry.id;
     for (const webhookEvent of entry.messaging) {
       if (webhookEvent.message) {
+        if (webhookEvent.message.is_echo) continue;
         const psid = webhookEvent.sender.id;
         const msg = webhookEvent.message;
 
@@ -73,6 +74,11 @@ app.post('/webhook', async (req, res) => {
   }
 });
 
+async function sendTypingIndicator(psid, pageId) {
+  const url = `https://graph.facebook.com/v19.0/${pageId}/messages?access_token=${process.env.PAGE_ACCESS_TOKEN}`;
+  await axios.post(url, { recipient: { id: psid }, sender_action: 'typing_on' }).catch(() => {});
+}
+
 async function processBufferedMessages(psid, pageId) {
   const buffer = messageBuffer.get(psid);
   messageBuffer.delete(psid);
@@ -83,8 +89,11 @@ async function processBufferedMessages(psid, pageId) {
     const storeConfig = config[0];
     if (!storeConfig || !storeConfig.aiEnabled) return;
 
+    await sendTypingIndicator(psid, pageId);
+
     const customer = await ChatService.getOrCreateCustomer(pageId, psid);
     const conversation = await ChatService.getOrCreateConversation(customer.id);
+    const isNewCustomer = customer._isNew || false;
 
     const userContents = [];
     let logContent = '';
@@ -117,9 +126,27 @@ async function processBufferedMessages(psid, pageId) {
       inventoryTable += `| ${p.name} | ${p.price} | ${p.sizes} | ${p.features} | ${p.isActive} |\n`;
     }
 
+    const customerContext = isNewCustomer
+      ? 'এটি নতুন কাস্টমার। প্রথমে উষ্ণভাবে স্বাগত জানাও, স্টোর সম্পর্কে ১ লাইনে বলো, এবং কীভাবে সাহায্য করতে পারো জিজ্ঞেস করো।'
+      : 'এটি পুরনো কাস্টমার। সরাসরি সাহায্য করো, আবার পরিচয় দেওয়ার দরকার নেই।';
+
     const systemPrompt = `
 ## তোমার পরিচয়
 ${storeConfig?.systemPersona || 'তুমি একজন সেলস অ্যাসিস্ট্যান্ট।'}
+
+## টোন ও ব্যক্তিত্ব
+- তুমি বন্ধুসুলভ, আন্তরিক, এবং professional — যেন একজন অভিজ্ঞ দোকানদার কথা বলছে।
+- ইমোজি ব্যবহার করো (কিন্তু অতিরিক্ত নয়, প্রতি মেসেজে ১-২টি)।
+- কাস্টমারকে "ভাইয়া" বা "আপু" বলো (casual but respectful)।
+- উৎসাহী এবং আত্মবিশ্বাসী থাকো, কিন্তু pushy হয়ো না।
+
+## রেসপন্স ফরম্যাট
+- প্রতিটি রেসপন্স সর্বোচ্চ ৩-৪ লাইন রাখো। Messenger-এ বড় প্যারাগ্রাফ কেউ পড়ে না।
+- একবারে একটি প্রশ্ন করো, একসাথে অনেকগুলো না।
+- দাম বলার সময় সংক্ষেপে বলো, লম্বা বর্ণনা দিও না।
+
+## কাস্টমার কনটেক্সট
+${customerContext}
 
 ## বর্তমান ইনভেন্টরি (স্টক)
 ${inventoryTable}
@@ -134,6 +161,11 @@ ${storeConfig?.paymentPolicy || ''}
 ৩. ডেলিভারি ঠিকানা জিজ্ঞেস করো (জেলা সহ, ডেলিভারি চার্জ ক্যালকুলেট করতে)
 ৪. মোট দাম (প্রোডাক্ট + ডেলিভারি) জানিয়ে অর্ডার কনফার্ম করো
 ৫. কাস্টমারকে ধন্যবাদ দাও ও ডেলিভারি টাইমলাইন জানাও
+
+## প্রোডাক্ট রেকমেন্ডেশন
+- কাস্টমার যদি একটি প্রোডাক্ট নিতে চায়, সেই ক্যাটাগরির অন্য ১-২টি প্রোডাক্ট suggest করো।
+- "এটার সাথে ___ও অনেকে নেন 😊" এই স্টাইলে বলো।
+- জোর করে বিক্রি করার চেষ্টা করো না, শুধু হালকাভাবে suggest করো।
 
 ## ছবি বিশ্লেষণের নিয়ম (ইমেজ হ্যান্ডলিং)
 ১. কাস্টমার ছবি পাঠালে প্রথমে নিখুঁতভাবে শনাক্ত করো ছবিতে আসলে কী পণ্য আছে।
@@ -168,6 +200,11 @@ ${storeConfig?.paymentPolicy || ''}
 
   } catch (err) {
     console.error('Error processing messages:', err);
+    try {
+      await sendFacebookMessage(psid, pageId,
+        'দুঃখিত, এই মুহূর্তে আমি রেসপন্ড করতে পারছি না। অনুগ্রহ করে কিছুক্ষণ পর আবার চেষ্টা করুন 🙏'
+      );
+    } catch (_) {}
   }
 }
 

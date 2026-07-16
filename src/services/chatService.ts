@@ -16,14 +16,14 @@ export class ChatService {
         .set({ lastActiveAt: new Date() })
         .where(eq(customers.id, existing[0].id))
         .returning();
-      return customer;
+      return { ...customer, _isNew: false };
     }
 
     const [newCustomer] = await db
       .insert(customers)
       .values({ pageId, psid })
       .returning();
-    return newCustomer;
+    return { ...newCustomer, _isNew: true };
   }
 
   static async getOrCreateConversation(customerId: string) {
@@ -63,7 +63,7 @@ export class ChatService {
     return newMessage;
   }
 
-  static async getRecentChatHistory(conversationId: string, limit = 10) {
+  static async getRecentChatHistory(conversationId: string, limit = 20) {
     const rawMessages = await db
       .select()
       .from(messages)
